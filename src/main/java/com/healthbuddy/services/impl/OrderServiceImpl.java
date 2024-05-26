@@ -98,8 +98,7 @@ public class OrderServiceImpl implements OrderService{
 
 	@Override
 	public List<Order> usersOrderHistory(Long userId) {
-		List<Order> orders = orderRepo.getUsersOrders(userId);
-		return orders;
+		return orderRepo.findByUserId(userId);
 	}
 
 	@Override

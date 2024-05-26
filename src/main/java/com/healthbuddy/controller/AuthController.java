@@ -1,5 +1,8 @@
 package com.healthbuddy.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +54,7 @@ public class AuthController {
 		String password = user.getPassword();
 		String firstName = user.getFirstName();
 		String lastName = user.getLastName();
+		String phone = user.getPhone();
 		
 		User isEmailPresent = userRepo.findByEmail(email);
 		if(isEmailPresent != null) {
@@ -63,6 +67,8 @@ public class AuthController {
 		userCreated.setPassword(passwordEncoder.encode(password));
 		userCreated.setFirstName(firstName);
 		userCreated.setLastName(lastName);
+		userCreated.setPhone(phone);
+		userCreated.setCreatedAt(LocalDateTime.now());
 		
 		User savedUser = userRepo.save(userCreated);
 		Cart cart = cartService.createCart(savedUser);

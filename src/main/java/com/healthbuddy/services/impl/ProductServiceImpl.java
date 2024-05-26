@@ -11,11 +11,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.healthbuddy.exceptions.ProductException;
 import com.healthbuddy.model.Category;
 import com.healthbuddy.model.Product;
 import com.healthbuddy.repository.CategoryRepo;
+import com.healthbuddy.repository.OrderItemRepo;
 import com.healthbuddy.repository.ProductRepo;
 import com.healthbuddy.request.CreateProductRequest;
 import com.healthbuddy.services.ProductService;
@@ -30,9 +32,21 @@ public class ProductServiceImpl implements ProductService{
 	private CategoryRepo categoryRepo;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private OrderItemRepo orderItemRepo;
 	
 	@Override
 	public Product createProduct(CreateProductRequest request) {
+		if (request.getFirstCategory() == null || request.getFirstCategory().trim().isEmpty()) {
+	        throw new IllegalArgumentException("First category name must not be null or empty");
+	    }
+	    if (request.getSecondCategory() == null || request.getSecondCategory().trim().isEmpty()) {
+	        throw new IllegalArgumentException("Second category name must not be null or empty");
+	    }
+	    if (request.getThirdCategory() == null || request.getThirdCategory().trim().isEmpty()) {
+	        throw new IllegalArgumentException("Third category name must not be null or empty");
+	    }
+		
 		Category firstLevel = categoryRepo.findByName(request.getFirstCategory());
 		
 		if(firstLevel == null)
@@ -83,9 +97,11 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 	@Override
+	@Transactional
 	public String deleteProduct(Long productId) throws ProductException {
 		Product product = findProductById(productId);
 		productRepo.delete(product);
+		orderItemRepo.deleteByProductId(productId);
 		return "Product Deleted Successfully";
 	}
 
