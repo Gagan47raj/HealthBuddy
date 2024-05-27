@@ -37,7 +37,8 @@ public class AppConfig {
 				CorsConfiguration cfg = new CorsConfiguration();
 				cfg.setAllowedOrigins(Arrays.asList(
 						"http://localhost:3000",
-						"http://localhost:4200"
+						"http://localhost:4200",
+                        "https://healthbuddy-pied.vercel.app"
 						));
 				cfg.setAllowedMethods(Collections.singletonList("*"));
 				cfg.setAllowCredentials(true);
