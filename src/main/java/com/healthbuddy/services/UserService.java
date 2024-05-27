@@ -14,5 +14,7 @@ public interface UserService {
     public List<User> findAllUsers();	
     
     public void deleteUser(Long userId) throws UserException;
+    
+    public User findUserByEmail(String email) throws UserException;
 	
 }

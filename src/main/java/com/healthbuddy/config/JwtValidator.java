@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import io.jsonwebtoken.Claims;
@@ -23,6 +24,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 public class JwtValidator extends OncePerRequestFilter {
 
     private static final Logger logger = Logger.getLogger(JwtValidator.class.getName());
@@ -32,26 +34,27 @@ public class JwtValidator extends OncePerRequestFilter {
             throws ServletException, IOException {
         String jwtString = request.getHeader(JwtConstants.JWT_HEADER);
 
-        if (jwtString != null) {
-            jwtString = jwtString.substring(7);
+        if (jwtString != null && jwtString.startsWith("Bearer ")) {
+            jwtString = jwtString.substring(7); // Extract token without "Bearer "
 
             try {
                 SecretKey key = Keys.hmacShaKeyFor(JwtConstants.SECRET_KEY.getBytes());
                 Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwtString).getBody();
 
                 String email = String.valueOf(claims.get("email"));
-                String authorities = String.valueOf(claims.get("authorities"));
-                List<GrantedAuthority> auths = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
+                List<GrantedAuthority> auths = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
                 Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, auths);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                logger.log(Level.INFO, "JWT token successfully validated for email: " + email);
             } catch (Exception e) {
-                // Log the exception with detailed information
                 logger.log(Level.SEVERE, "Error parsing JWT token: " + e.getMessage(), e);
-                // Throw BadCredentialsException with custom error message
                 throw new BadCredentialsException("Invalid token received from jwt validator");
             }
+        } else {
+            logger.log(Level.WARNING, "No JWT token found in the request headers or token does not start with Bearer");
         }
+
         filterChain.doFilter(request, response);
     }
-    
 }

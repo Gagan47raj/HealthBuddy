@@ -11,13 +11,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.healthbuddy.exceptions.ProductException;
 import com.healthbuddy.model.Category;
 import com.healthbuddy.model.Product;
 import com.healthbuddy.repository.CategoryRepo;
-import com.healthbuddy.repository.OrderItemRepo;
 import com.healthbuddy.repository.ProductRepo;
 import com.healthbuddy.request.CreateProductRequest;
 import com.healthbuddy.services.ProductService;
@@ -32,53 +30,21 @@ public class ProductServiceImpl implements ProductService{
 	private CategoryRepo categoryRepo;
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private OrderItemRepo orderItemRepo;
 	
 	@Override
 	public Product createProduct(CreateProductRequest request) {
-		if (request.getFirstCategory() == null || request.getFirstCategory().trim().isEmpty()) {
-	        throw new IllegalArgumentException("First category name must not be null or empty");
-	    }
-	    if (request.getSecondCategory() == null || request.getSecondCategory().trim().isEmpty()) {
-	        throw new IllegalArgumentException("Second category name must not be null or empty");
-	    }
-	    if (request.getThirdCategory() == null || request.getThirdCategory().trim().isEmpty()) {
-	        throw new IllegalArgumentException("Third category name must not be null or empty");
-	    }
+		Category category = categoryRepo.findByName(request.getCategory());
 		
-		Category firstLevel = categoryRepo.findByName(request.getFirstCategory());
-		
-		if(firstLevel == null)
+		if(category == null)
 		{
-			Category firstCategory = new Category();
-			firstCategory.setName(request.getFirstCategory());
-			firstCategory.setLevel(1);
-			
-			firstLevel = categoryRepo.save(firstCategory);
+			category = new Category();
+			category.setName(request.getName());
+			category = categoryRepo.save(category);
 		}
 		
-		Category secondLevel = categoryRepo.findByNameAndParent(request.getSecondCategory(),firstLevel.getName());
-		if(secondLevel == null)
-		{
-			Category secondCategory = new Category();
-			secondCategory.setName(request.getSecondCategory());
-			secondCategory.setParentCategory(firstLevel);
-		    secondCategory.setLevel(2);
-		    
-		    secondLevel = categoryRepo.save(secondCategory);
-		}
 		
-		Category thirdLevel = categoryRepo.findByNameAndParent(request.getThirdCategory(),secondLevel.getName());
-		if(thirdLevel == null)
-		{
-			Category thirdCategory = new Category();
-			thirdCategory.setName(request.getThirdCategory());
-			thirdCategory.setParentCategory(secondLevel);
-		    thirdCategory.setLevel(3);
-		    
-		    thirdLevel = categoryRepo.save(thirdCategory);
-	}
+		
+		
 		Product product = new Product();
 		product.setName(request.getName());
 		product.setDescription(request.getDescription());
@@ -88,7 +54,7 @@ public class ProductServiceImpl implements ProductService{
 		product.setQuantity(request.getQuantity());
 		product.setBrand(request.getBrand());
 		product.setImageUrl(request.getImageUrl());
-		product.setCategory(thirdLevel);
+		product.setCategory(category);
 	    product.setCreatedAt(LocalDateTime.now());
 	    
 	    Product savedProduct = productRepo.save(product);
@@ -97,11 +63,9 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 	@Override
-	@Transactional
 	public String deleteProduct(Long productId) throws ProductException {
 		Product product = findProductById(productId);
 		productRepo.delete(product);
-		orderItemRepo.deleteByProductId(productId);
 		return "Product Deleted Successfully";
 	}
 
@@ -163,6 +127,6 @@ public class ProductServiceImpl implements ProductService{
 		// TODO Auto-generated method stub
 		return productRepo.findAll();
 	}
+}
 
 	
-}

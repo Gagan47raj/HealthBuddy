@@ -17,13 +17,7 @@ public class CreateProductRequest {
 	private String brand;
 	private String imageUrl;
 	
-	private String firstCategory;
-	private String secondCategory;
-	private String thirdCategory;
-	
-
-
-
-	
-
+	private String category;
+	private String severity;
+	private String medicineType;
 }

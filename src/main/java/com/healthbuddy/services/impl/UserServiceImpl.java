@@ -64,4 +64,13 @@ public class UserServiceImpl implements UserService {
         userRepo.deleteById(userId);
 	}
 
+	@Override
+	public User findUserByEmail(String email) throws UserException {
+		User user = userRepo.findByEmail(email);
+        if (user == null) {
+            throw new UserException("User not found with email: " + email);
+        }
+        return user;
+	}
+
 }

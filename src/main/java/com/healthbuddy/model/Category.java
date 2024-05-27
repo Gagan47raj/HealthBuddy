@@ -19,13 +19,7 @@ public class Category {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
 	
-	@NotNull(message = "Category name must not be null")
-	@Size(max = 200)
+	@NotNull
+	@Size(max = 50)
 	private String name;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "parent_category_id")
-	private Category parentCategory;
-	
-	private int level;
 }

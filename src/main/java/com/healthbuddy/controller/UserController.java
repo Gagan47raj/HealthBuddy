@@ -2,6 +2,8 @@ package com.healthbuddy.controller;
 
 import java.util.List;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.healthbuddy.config.ApiResponse;
+import com.healthbuddy.config.JwtConstants;
 import com.healthbuddy.exceptions.UserException;
 import com.healthbuddy.model.User;
 import com.healthbuddy.services.UserService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 @RestController
 @RequestMapping("/api/users")
@@ -29,9 +36,24 @@ public class UserController {
 	public ResponseEntity<User> getUserProfileHandler(
 		@RequestHeader("Authorization") String jwt
 	) throws UserException{
-		User user = userService.findUserProfileByJwt(jwt);
-		return new ResponseEntity<User>(user,HttpStatus.ACCEPTED);
+		String email = extractEmailFromJwt(jwt);
+        User user = userService.findUserByEmail(email);
+        return new ResponseEntity<User>(user, HttpStatus.ACCEPTED);
 	}
+	
+	private String extractEmailFromJwt(String jwt) throws UserException {
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7); // Remove "Bearer " prefix
+            try {
+                SecretKey key = Keys.hmacShaKeyFor(JwtConstants.SECRET_KEY.getBytes());
+                Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
+                return String.valueOf(claims.get("email"));
+            } catch (Exception e) {
+                throw new UserException("Invalid JWT token: " + e.getMessage());
+            }
+        }
+        throw new UserException("JWT token is missing or invalid");
+    }
 	
 	@GetMapping("/admin")
     public ResponseEntity<List<User>> getAllUsersHandler() {
