@@ -32,6 +32,14 @@ public class JwtValidator extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+    	
+    	String requestPath = request.getServletPath();
+        if ("/api/contact".equals(requestPath)) {
+            filterChain.doFilter(request, response);
+            return; // Skip JWT validation for this endpoint
+        }
+    	
+    	
         String jwtString = request.getHeader(JwtConstants.JWT_HEADER);
 
         if (jwtString != null && jwtString.startsWith("Bearer ")) {

@@ -1,7 +1,5 @@
 package com.healthbuddy.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -30,12 +28,15 @@ public class ProductController {
 			@RequestParam Integer maxPrice,
 			@RequestParam Integer minDiscount,
 			@RequestParam String sortBy,
+			@RequestParam String severity,
+			@RequestParam String medicineType,
 			@RequestParam String stock,
 			@RequestParam Integer pageNumber,
-			@RequestParam Integer pageSize) throws ProductException
+			@RequestParam Integer pageSize,
+			@RequestParam(defaultValue = "") String searchKey) throws ProductException
 	{
-		Page<Product> res = productService.getAllProducts(category, minPrice, maxPrice, minDiscount, sortBy, stock, pageNumber, pageSize);
-		System.out.print("Complete Product");
+		Page<Product> res = productService.getAllProducts(category, minPrice, maxPrice, minDiscount, sortBy,severity,medicineType ,stock, pageNumber, pageSize, searchKey);
+		System.out.printf("Complete Product :  %d", res.getSize() - 1);
 		return new ResponseEntity<>(res,HttpStatus.ACCEPTED);
 	}
 	

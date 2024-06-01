@@ -25,6 +25,7 @@ public class AppConfig {
 		.authorizeHttpRequests(
 				Authorize -> Authorize
 				.requestMatchers("/api/users/admin").permitAll()
+				.requestMatchers("/api/contact").permitAll()
 				.requestMatchers("/api/**").authenticated()
 				.anyRequest().permitAll())
 		

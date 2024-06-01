@@ -17,7 +17,6 @@ import com.healthbuddy.model.Order;
 import com.healthbuddy.model.OrderItem;
 import com.healthbuddy.model.User;
 import com.healthbuddy.repository.AddressRepo;
-import com.healthbuddy.repository.CartRepo;
 import com.healthbuddy.repository.OrderItemRepo;
 import com.healthbuddy.repository.OrderRepo;
 import com.healthbuddy.repository.UserRepo;

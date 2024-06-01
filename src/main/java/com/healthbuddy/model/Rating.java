@@ -1,5 +1,6 @@
 package com.healthbuddy.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 import jakarta.persistence.Column;
@@ -16,8 +17,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Rating {
-
+public class Rating implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

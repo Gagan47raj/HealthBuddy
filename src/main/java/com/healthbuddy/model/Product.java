@@ -68,6 +68,12 @@ public class Product {
 	@JoinColumn(name="category_id")
 	private Category category;
 	
+	@Column(name = "severity")
+	private String severity;
+	
+	@Column(name = "medicine_type")
+	private String medicineType;
+	
 	private LocalDateTime createdAt; 
 	
 	

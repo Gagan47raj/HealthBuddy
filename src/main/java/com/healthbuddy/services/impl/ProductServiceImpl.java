@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import com.healthbuddy.exceptions.ProductException;
@@ -38,7 +39,7 @@ public class ProductServiceImpl implements ProductService{
 		if(category == null)
 		{
 			category = new Category();
-			category.setName(request.getName());
+			category.setName(request.getCategory());
 			category = categoryRepo.save(category);
 		}
 		
@@ -55,6 +56,8 @@ public class ProductServiceImpl implements ProductService{
 		product.setBrand(request.getBrand());
 		product.setImageUrl(request.getImageUrl());
 		product.setCategory(category);
+		product.setSeverity(request.getSeverity());
+		product.setMedicineType(request.getMedicineType());
 	    product.setCreatedAt(LocalDateTime.now());
 	    
 	    Product savedProduct = productRepo.save(product);
@@ -98,12 +101,23 @@ public class ProductServiceImpl implements ProductService{
 
 	@Override
 	public Page<Product> getAllProducts(String category, Integer minPrice, Integer maxPrice,
-			Integer minDiscount, String sortBy, String stock, Integer pageNumber, Integer pageSize)
+			Integer minDiscount, String severity, String medicineType ,String sortBy, String stock, Integer pageNumber, Integer pageSize, String searchKey)
 			throws ProductException {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		List<Product> products = productRepo.filterProducts(category, minPrice, maxPrice, minDiscount, sortBy);
 		
-		if(stock != null)
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		
+        List<Product> products;
+//		List<Product> products = productRepo.filterProducts(category, minPrice, maxPrice, minDiscount,severity,medicineType ,sortBy);
+		
+        if (!searchKey.isEmpty()) {
+            Page<Product> searchResults = (Page<Product>) productRepo.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(searchKey, searchKey, pageable);
+            products = searchResults.getContent();
+        } else {
+            products = productRepo.filterProducts(category, minPrice, maxPrice, minDiscount, severity, medicineType, sortBy);
+        }
+
+		
+		
 		{
 			if(stock.equals("in_stock"))
 			{
@@ -118,13 +132,14 @@ public class ProductServiceImpl implements ProductService{
 		int startIndex = (int)pageable.getOffset();
 		int endIndex = Math.min((startIndex + pageable.getPageSize()), products.size());
 		List<Product> pageContent = products.subList(startIndex, endIndex);
-		Page<Product> page = new PageImpl<>(pageContent, pageable, products.size());
-		return page;
+//		Page<Product> page = new PageImpl<>(pageContent, pageable, products.size());
+		
+//        redisTemplate.opsForValue().set(cacheKey, page, 10, TimeUnit.MINUTES);
+		return new PageImpl<>(pageContent, pageable, products.size());
 	}
 
 	@Override
 	public List<Product> findAllProducts() throws ProductException {
-		// TODO Auto-generated method stub
 		return productRepo.findAll();
 	}
 }
