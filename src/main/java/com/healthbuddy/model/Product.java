@@ -76,5 +76,9 @@ public class Product {
 	
 	private LocalDateTime createdAt; 
 	
+	@ManyToOne
+	@JoinColumn(name="size_id")
+	private Sizes sizes;
+	
 	
 }

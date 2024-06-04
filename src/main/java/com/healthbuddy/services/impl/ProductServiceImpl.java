@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 import com.healthbuddy.exceptions.ProductException;
 import com.healthbuddy.model.Category;
 import com.healthbuddy.model.Product;
+import com.healthbuddy.model.Sizes;
 import com.healthbuddy.repository.CategoryRepo;
 import com.healthbuddy.repository.ProductRepo;
+import com.healthbuddy.repository.SizesRepo;
 import com.healthbuddy.request.CreateProductRequest;
 import com.healthbuddy.services.ProductService;
 import com.healthbuddy.services.UserService;
@@ -31,9 +33,12 @@ public class ProductServiceImpl implements ProductService{
 	private CategoryRepo categoryRepo;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private SizesRepo sizesRepo;
 	
 	@Override
 	public Product createProduct(CreateProductRequest request) {
+		System.out.println("Received request: " + request.getSize());
 		Category category = categoryRepo.findByName(request.getCategory());
 		
 		if(category == null)
@@ -43,8 +48,13 @@ public class ProductServiceImpl implements ProductService{
 			category = categoryRepo.save(category);
 		}
 		
-		
-		
+		Sizes sizes = sizesRepo.findBySize(request.getSize());
+		if(sizes == null)
+		{
+			sizes = new Sizes();
+			sizes.setSize(request.getSize());
+			sizes = sizesRepo.save(sizes);
+		}
 		
 		Product product = new Product();
 		product.setName(request.getName());
@@ -59,6 +69,7 @@ public class ProductServiceImpl implements ProductService{
 		product.setSeverity(request.getSeverity());
 		product.setMedicineType(request.getMedicineType());
 	    product.setCreatedAt(LocalDateTime.now());
+	    product.setSizes(sizes);
 	    
 	    Product savedProduct = productRepo.save(product);
 	    

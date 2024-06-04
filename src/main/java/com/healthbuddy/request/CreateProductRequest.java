@@ -1,7 +1,5 @@
 package com.healthbuddy.request;
 
-
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,4 +18,5 @@ public class CreateProductRequest {
 	private String category;
 	private String severity;
 	private String medicineType;
+	private String size;
 }
